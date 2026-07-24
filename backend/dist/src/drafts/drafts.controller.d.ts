@@ -43,8 +43,8 @@ export declare class DraftsController {
             summary: string;
             embedding: import("@prisma/client/runtime/library").JsonValue | null;
             score: number;
-            draftId: string;
             findings: import("@prisma/client/runtime/library").JsonValue;
+            draftId: string;
         }[];
     } & {
         id: string;
@@ -93,8 +93,8 @@ export declare class DraftsController {
             summary: string;
             embedding: import("@prisma/client/runtime/library").JsonValue | null;
             score: number;
-            draftId: string;
             findings: import("@prisma/client/runtime/library").JsonValue;
+            draftId: string;
         }[];
         humanReviews: {
             id: string;

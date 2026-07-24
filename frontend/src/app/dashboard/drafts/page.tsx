@@ -131,27 +131,48 @@ export default function DraftsPage() {
   };
 
   // Live support chat handler
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!chatInput.trim()) return;
 
     const userMsg = chatInput.trim();
-    const newMsgs = [...chatMessages, { sender: "user", text: userMsg }];
-    setChatMessages(newMsgs);
+    setChatMessages(prev => [...prev, { sender: "user", text: userMsg }]);
     setChatInput("");
+    setChatMessages(prev => [...prev, { sender: "bot", text: "Escribiendo..." }]);
 
-    setTimeout(() => {
-      let botReply = "Entiendo. Un operador de soporte se pondrá en contacto contigo pronto, o puedes revisar las guías en la Biblioteca de Recursos.";
-      const msgLower = userMsg.toLowerCase();
-      if (msgLower.includes("orcid") || msgLower.includes("sincroniz")) {
-        botReply = "Para la sincronización de ORCID, asegúrate de vincular tu cuenta con tu ORCID iD en Configuración. Si las obras no aparecen, usa la acción rápida 'Sincronizar ORCID' del panel.";
-      } else if (msgLower.includes("ia") || msgLower.includes("borrador") || msgLower.includes("pdf") || msgLower.includes("lote")) {
-        botReply = "El procesamiento por lotes analiza entre 10 y 20 documentos a la vez. Nuestro motor en segundo plano extrae el texto, revisa la originalidad, las citas y genera reportes PDF consolidados descargables en ZIP.";
-      } else if (msgLower.includes("asesor") || msgLower.includes("vincular")) {
-        botReply = "Puedes vincular a tu asesor desde la pestaña Configuración en el menú lateral. Una vez vinculado, él podrá ver tus borradores automáticamente.";
+    try {
+      const webhookUrl = process.env.NEXT_PUBLIC_N8N_SUPPORT_WEBHOOK_URL;
+      if (!webhookUrl) {
+        throw new Error("URL del webhook de n8n no configurada");
       }
-      setChatMessages(prev => [...prev, { sender: "bot", text: botReply }]);
-    }, 1000);
+      const userName = session?.user?.name || "Usuario Anónimo";
+
+      const response = await fetch(webhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: userMsg,
+          usuario: userName,
+          tipo: "Soporte Técnico"
+        }),
+      });
+
+      const data = await response.json();
+      console.log('Respuesta de n8n:', data);
+      const botReply = data.response || data.output || data.message || "No pude procesar tu consulta. Intenta de nuevo.";
+
+      setChatMessages(prev => {
+        const msgs = [...prev];
+        msgs[msgs.length - 1] = { sender: "bot", text: botReply };
+        return msgs;
+      });
+    } catch (error) {
+      setChatMessages(prev => {
+        const msgs = [...prev];
+        msgs[msgs.length - 1] = { sender: "bot", text: "Error de conexión. Verifica tu internet e intenta de nuevo." };
+        return msgs;
+      });
+    }
   };
 
   // Compare draft versions helper
@@ -511,6 +532,14 @@ export default function DraftsPage() {
                 {(session?.user as any)?.role === "ADVISOR" ? "Borradores a Revisar" : "Mis Borradores"}
               </Link>
               <Link 
+                href="/dashboard/generator" 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-3 p-3.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-xl transition-all font-medium"
+              >
+                <Layers className="h-5 w-5 text-slate-400" />
+                Generador de Tesis
+              </Link>
+              <Link 
                 href="/dashboard/settings" 
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="flex items-center gap-3 p-3.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-xl transition-all font-medium"
@@ -584,6 +613,10 @@ export default function DraftsPage() {
             <FileText className="h-5 w-5 text-indigo-600" />
             {(session?.user as any)?.role === "ADVISOR" ? "Borradores a Revisar" : "Mis Borradores"}
           </Link>
+          <Link href="/dashboard/generator" className="flex items-center gap-3 p-3 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-xl transition-all font-medium">
+            <Layers className="h-5 w-5 text-slate-400" />
+            Generador de Tesis
+          </Link>
           <Link href="/dashboard/settings" className="flex items-center gap-3 p-3 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-xl transition-all font-medium">
             <Settings className="h-5 w-5 text-slate-400" />
             Configuración
@@ -650,6 +683,14 @@ export default function DraftsPage() {
           {/* Action buttons */}
           <div className="flex gap-3">
             {(session?.user as any)?.role !== "ADVISOR" && (
+              <>
+                <Link 
+                href="/dashboard/generator"
+                className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-xl shadow-md hover:shadow-lg transition-all font-semibold text-sm cursor-pointer"
+              >
+                <FileText className="h-4.5 w-4.5" />
+                Generar Estructura
+              </Link>
               <button 
                 onClick={() => setIsUploadModalOpen(true)}
                 className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 rounded-xl shadow-md hover:shadow-lg transition-all font-semibold text-sm cursor-pointer"
@@ -657,6 +698,7 @@ export default function DraftsPage() {
                 <Plus className="h-4.5 w-4.5" />
                 Nuevo Borrador
               </button>
+              </>
             )}
           </div>
         </div>

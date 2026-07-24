@@ -108,4 +108,85 @@ export class EmailService {
       return false;
     }
   }
+
+  async sendArticle(
+    to: string,
+    articleTitle: string,
+    fileBuffer: Buffer,
+    fileType: 'pdf' | 'docx',
+    authorName: string,
+  ): Promise<boolean> {
+    const from = this.configService.get('SMTP_FROM') || this.configService.get('SMTP_USER') || 'noreply@thesis-ia.com';
+
+    const htmlContent = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 25px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+        <div style="text-align: center; margin-bottom: 25px; border-bottom: 2px solid #10b981; padding-bottom: 15px;">
+          <span style="font-size: 32px;">📄</span>
+          <h2 style="color: #10b981; margin: 5px 0 0 0; font-weight: 800;">Tesis-IA</h2>
+          <p style="color: #64748b; font-size: 13px; margin: 3px 0 0 0; font-weight: 600; uppercase; tracking-wider;">Artículo Académico Generado</p>
+        </div>
+
+        <p style="color: #1e293b; font-size: 16px; line-height: 1.6; margin-bottom: 12px;">
+          Estimado/a <strong>${authorName}</strong>,
+        </p>
+        <p style="color: #334155; font-size: 15px; line-height: 1.6; margin-bottom: 20px;">
+          Tu artículo académico titulado <strong style="color: #1e293b;">"${articleTitle}"</strong> ha sido generado exitosamente por nuestro sistema de inteligencia artificial.
+        </p>
+
+        <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 18px; margin: 25px 0; text-align: center;">
+          <span style="display: block; font-size: 11px; font-weight: bold; color: #166534; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">Formato del Archivo</span>
+          <span style="font-size: 32px; font-weight: 900; color: #10b981;">${fileType.toUpperCase()}</span>
+        </div>
+
+        <p style="color: #334155; font-size: 14px; line-height: 1.6; margin-bottom: 20px;">
+          Adjunto a este correo encontrarás el artículo completo en formato <strong>${fileType.toUpperCase()}</strong> con todas las secciones generadas según los estándares académicos.
+        </p>
+
+        <div style="margin: 25px 0; padding: 12px 16px; background-color: #ecfdf5; border-left: 4px solid #10b981; border-radius: 4px;">
+          <p style="color: #166534; font-size: 12px; margin: 0; line-height: 1.5; font-weight: 600;">
+            💡 Recuerda revisar y editar el contenido antes de someterlo a una revista científica.
+          </p>
+        </div>
+
+        <p style="color: #94a3b8; font-size: 11px; line-height: 1.5; margin-top: 35px; border-top: 1px solid #f1f5f9; padding-top: 15px; text-align: center;">
+          Este es un correo automático generado por el Sistema de Generación de Artículos IA.<br/>
+          Por favor, no respondas a este mensaje.
+        </p>
+      </div>
+    `;
+
+    const cleanTitle = articleTitle.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 30);
+    const filename = `articulo_${cleanTitle}.${fileType}`;
+    const contentType = fileType === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+
+    if (!this.transporter) {
+      console.log(`[SIMULACIÓN DE CORREO]
+      Para: ${to}
+      Asunto: 📄 Artículo Generado: ${articleTitle}
+      Adjunto: ${filename} (${fileBuffer.length} bytes)
+      Detalle: Configura SMTP_USER y SMTP_PASS en tu archivo .env para enviar correos reales.`);
+      return true;
+    }
+
+    try {
+      await this.transporter.sendMail({
+        from: `"Tesis-IA" <${from}>`,
+        to,
+        subject: `📄 Artículo Generado: "${articleTitle}"`,
+        html: htmlContent,
+        attachments: [
+          {
+            filename,
+            content: fileBuffer,
+            contentType,
+          },
+        ],
+      });
+      console.log(`Article successfully emailed to ${to}`);
+      return true;
+    } catch (error) {
+      console.error(`Failed to send email to ${to}:`, error.message);
+      return false;
+    }
+  }
 }

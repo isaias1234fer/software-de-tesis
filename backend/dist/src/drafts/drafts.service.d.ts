@@ -41,8 +41,8 @@ export declare class DraftsService {
             summary: string;
             embedding: import("@prisma/client/runtime/library").JsonValue | null;
             score: number;
-            draftId: string;
             findings: import("@prisma/client/runtime/library").JsonValue;
+            draftId: string;
         }[];
         humanReviews: {
             id: string;

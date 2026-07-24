@@ -22,6 +22,7 @@ const ai_module_1 = require("./ai/ai.module");
 const bullmq_1 = require("@nestjs/bullmq");
 const dashboard_module_1 = require("./dashboard/dashboard.module");
 const email_module_1 = require("./email/email.module");
+const articles_module_1 = require("./articles/articles.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -71,6 +72,7 @@ exports.AppModule = AppModule = __decorate([
             ai_module_1.AiModule,
             dashboard_module_1.DashboardModule,
             email_module_1.EmailModule,
+            articles_module_1.ArticlesModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

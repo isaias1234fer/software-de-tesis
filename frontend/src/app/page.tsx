@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { GraduationCap, FileText, CheckCircle, ShieldCheck } from "lucide-react";
+import { GraduationCap, FileText, CheckCircle, ShieldCheck, BookOpen } from "lucide-react";
 
 export default function Home() {
   return (
@@ -76,6 +76,44 @@ export default function Home() {
                   Detección de plagio y validación automática de referencias bibliográficas (APA, IEEE, etc).
                 </p>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Generators Section */}
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-gray-50">
+          <div className="container px-4 md:px-6 mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-gray-900 mb-4">
+                Generadores con IA
+              </h2>
+              <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl">
+                Crea tesis y artículos académicos completos utilizando inteligencia artificial
+              </p>
+            </div>
+            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-2 max-w-4xl mx-auto">
+              <Link
+                href="/generador-tesis"
+                className="flex flex-col items-center space-y-4 border p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow bg-white"
+              >
+                <GraduationCap className="h-16 w-16 text-blue-600" />
+                <h3 className="text-2xl font-bold text-gray-900">Generador de Tesis</h3>
+                <p className="text-center text-gray-500">
+                  Genera tesis completas siguiendo las normas de la UNT. Incluye estructura, contenido académico y referencias.
+                </p>
+                <span className="text-blue-600 font-medium hover:underline">Acceder al generador →</span>
+              </Link>
+              <Link
+                href="/generador-articulos"
+                className="flex flex-col items-center space-y-4 border p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow bg-white"
+              >
+                <BookOpen className="h-16 w-16 text-emerald-600" />
+                <h3 className="text-2xl font-bold text-gray-900">Generador de Artículos</h3>
+                <p className="text-center text-gray-500">
+                  Crea artículos académicos con estructura IMRYD. Ideal para publicaciones en revistas científicas.
+                </p>
+                <span className="text-emerald-600 font-medium hover:underline">Acceder al generador →</span>
+              </Link>
             </div>
           </div>
         </section>

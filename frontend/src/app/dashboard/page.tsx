@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { GraduationCap, LogOut, FileText, LayoutDashboard, Settings, Clock, CheckCircle2, AlertCircle, AlertTriangle, BookOpen, History, MessageSquare, X, Menu, Layers, Smartphone, Mail, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-
 interface Kpis {
   totalDrafts: number;
   reviewedDrafts: number;
@@ -49,31 +48,54 @@ export default function DashboardPage() {
     { sender: "bot", text: "¡Hola! Soy el asistente de soporte de Tesis-IA. ¿En qué puedo ayudarte hoy?" }
   ]);
   const [chatInput, setChatInput] = useState("");
+  const [isChatLoading, setIsChatLoading] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileSimOpen, setIsMobileSimOpen] = useState(false);
   const [activeSimTab, setActiveSimTab] = useState<'dashboard' | 'drafts' | 'settings'>('dashboard');
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!chatInput.trim()) return;
+    if (!chatInput.trim() || isChatLoading) return;
 
     const userMsg = chatInput.trim();
-    const newMsgs = [...chatMessages, { sender: "user", text: userMsg }];
-    setChatMessages(newMsgs);
+    setChatMessages(prev => [...prev, { sender: "user", text: userMsg }]);
     setChatInput("");
+    setIsChatLoading(true);
+    setChatMessages(prev => [...prev, { sender: "bot", text: "Escribiendo..." }]);
 
-    setTimeout(() => {
-      let botReply = "Entiendo. Un operador de soporte se pondrá en contacto contigo pronto, o puedes revisar las guías en la Biblioteca de Recursos.";
-      const msgLower = userMsg.toLowerCase();
-      if (msgLower.includes("orcid") || msgLower.includes("sincroniz")) {
-        botReply = "Para la sincronización de ORCID, asegúrate de vincular tu cuenta con tu ORCID iD en Configuración. Si las obras no aparecen, usa la acción rápida 'Sincronizar ORCID' del panel.";
-      } else if (msgLower.includes("ia") || msgLower.includes("borrador") || msgLower.includes("pdf")) {
-        botReply = "Nuestra IA analiza ortografía, estructura y citas (APA/IEEE). Si el borrador pesa más de 20MB, te recomendamos comprimir el PDF antes de cargarlo.";
-      } else if (msgLower.includes("asesor") || msgLower.includes("vincular")) {
-        botReply = "Puedes vincular a tu asesor desde la pestaña Configuración en el menú lateral. Una vez vinculado, él podrá ver tus borradores automáticamente.";
+    try {
+      const webhookUrl = process.env.NEXT_PUBLIC_N8N_SUPPORT_WEBHOOK_URL;
+      if (!webhookUrl) {
+        throw new Error("URL del webhook de n8n no configurada");
       }
-      setChatMessages(prev => [...prev, { sender: "bot", text: botReply }]);
-    }, 1000);
+
+      const response = await fetch(webhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: userMsg,
+          sender: "user"
+        }),
+      });
+
+      const data = await response.json();
+      console.log('Respuesta de n8n:', data);
+      const botReply = data.output || data.text || data[0]?.output || "No pude procesar tu consulta.";
+
+      setChatMessages(prev => {
+        const msgs = [...prev];
+        msgs[msgs.length - 1] = { sender: "bot", text: botReply };
+        return msgs;
+      });
+    } catch (error) {
+      setChatMessages(prev => {
+        const msgs = [...prev];
+        msgs[msgs.length - 1] = { sender: "bot", text: "Error de conexión. Verifica tu internet e intenta de nuevo." };
+        return msgs;
+      });
+    } finally {
+      setIsChatLoading(false);
+    }
   };
 
   const handleRequestMeeting = (e: React.FormEvent) => {
@@ -167,14 +189,19 @@ export default function DashboardPage() {
     }
   };
 
-  if (status === "unauthenticated") {
-    router.push("/auth/login");
-    return null;
-  }
+useEffect(() => {
+    if (status === "unauthenticated") {
+        router.push("/auth/login");
+    }
+}, [status, router]);
 
-  if (status === "loading" || loading) {
+if (status === "loading" || loading) {
     return <div className="flex min-h-screen items-center justify-center">Cargando panel...</div>;
-  }
+}
+
+if (status === "unauthenticated") {
+    return null;
+}
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -239,6 +266,22 @@ export default function DashboardPage() {
               >
                 <FileText className="h-5 w-5 text-slate-400" />
                 {(session?.user as any)?.role === "ADVISOR" ? "Borradores a Revisar" : "Mis Borradores"}
+              </Link>
+              <Link 
+                href="/dashboard/generator" 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-3 p-3.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-xl transition-all font-medium"
+              >
+                <Layers className="h-5 w-5 text-slate-400" />
+                Generador de Tesis
+              </Link>
+              <Link 
+                href="/generador-articulos" 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-3 p-3.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-xl transition-all font-medium"
+              >
+                <BookOpen className="h-5 w-5 text-slate-400" />
+                Generador de Artículos
               </Link>
               <Link 
                 href="/dashboard/settings" 
@@ -313,6 +356,14 @@ export default function DashboardPage() {
           <Link href="/dashboard/drafts" className="flex items-center gap-3 p-3 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-xl transition-all font-medium">
             <FileText className="h-5 w-5 text-slate-400" />
             {(session?.user as any)?.role === "ADVISOR" ? "Borradores a Revisar" : "Mis Borradores"}
+          </Link>
+          <Link href="/dashboard/generator" className="flex items-center gap-3 p-3 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-xl transition-all font-medium">
+            <Layers className="h-5 w-5 text-slate-400" />
+            Generador de Tesis
+          </Link>
+          <Link href="/generador-articulos" className="flex items-center gap-3 p-3 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-xl transition-all font-medium">
+            <BookOpen className="h-5 w-5 text-slate-400" />
+            Generador de Artículos
           </Link>
           <Link href="/dashboard/settings" className="flex items-center gap-3 p-3 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-xl transition-all font-medium">
             <Settings className="h-5 w-5 text-slate-400" />
@@ -600,6 +651,16 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
               {(session?.user as any)?.role === "STUDENT" ? (
                 <>
+                  <Link 
+                    href="/dashboard/generator"
+                    className="flex items-center gap-3 p-4 bg-indigo-50/50 hover:bg-indigo-50 text-indigo-700 rounded-xl transition-all font-semibold border border-indigo-100 text-left shadow-sm cursor-pointer"
+                  >
+                    <FileText className="h-5 w-5 shrink-0 text-indigo-600" />
+                    <div>
+                      <p className="text-sm font-bold">Generar Estructura</p>
+                      <p className="text-xs text-indigo-500 font-medium">Plantilla de tesis UNT</p>
+                    </div>
+                  </Link>
                   <button 
                     onClick={() => setIsMeetingModalOpen(true)}
                     className="flex items-center gap-3 p-4 bg-blue-50/50 hover:bg-blue-50 text-blue-700 rounded-xl transition-all font-semibold border border-blue-100 text-left shadow-sm cursor-pointer"
@@ -613,38 +674,28 @@ export default function DashboardPage() {
                   <button 
                     onClick={handleSendConsolidatedEmail}
                     disabled={emailSendingId !== null}
-                    className="flex items-center gap-3 p-4 bg-indigo-50/50 hover:bg-indigo-50 text-indigo-700 rounded-xl transition-all font-semibold border border-indigo-100 text-left shadow-sm cursor-pointer disabled:opacity-50"
+                    className="flex items-center gap-3 p-4 bg-purple-50/50 hover:bg-purple-50 text-purple-700 rounded-xl transition-all font-semibold border border-purple-100 text-left shadow-sm cursor-pointer disabled:opacity-50"
                   >
                     {emailSendingId !== null ? (
-                      <Clock className="h-5 w-5 shrink-0 text-indigo-650 animate-spin" />
+                      <Clock className="h-5 w-5 shrink-0 text-purple-650 animate-spin" />
                     ) : (
-                      <Mail className="h-5 w-5 shrink-0 text-indigo-600" />
+                      <Mail className="h-5 w-5 shrink-0 text-purple-600" />
                     )}
                     <div>
                       <p className="text-sm font-bold">Enviar al Correo</p>
-                      <p className="text-xs text-indigo-500 font-medium">Recibir PDF en tu celular</p>
+                      <p className="text-xs text-purple-500 font-medium">Recibir PDF en tu celular</p>
                     </div>
                   </button>
                   <Link 
                     href="/dashboard/drafts"
-                    className="flex items-center gap-3 p-4 bg-purple-50/50 hover:bg-purple-50 text-purple-700 rounded-xl transition-all font-semibold border border-purple-100 text-left shadow-sm cursor-pointer"
+                    className="flex items-center gap-3 p-4 bg-pink-50/50 hover:bg-pink-50 text-pink-700 rounded-xl transition-all font-semibold border border-pink-100 text-left shadow-sm cursor-pointer"
                   >
-                    <Layers className="h-5 w-5 shrink-0 text-purple-600" />
+                    <Layers className="h-5 w-5 shrink-0 text-pink-600" />
                     <div>
                       <p className="text-sm font-bold">Carga por Lotes</p>
-                      <p className="text-xs text-purple-500 font-medium">Subir 10-20 tesis juntas</p>
+                      <p className="text-xs text-pink-500 font-medium">Subir 10-20 tesis juntas</p>
                     </div>
                   </Link>
-                  <button 
-                    onClick={handleGenerateProgressReport}
-                    className="flex items-center gap-3 p-4 bg-green-50/50 hover:bg-green-50 text-green-700 rounded-xl transition-all font-semibold border border-green-100 text-left shadow-sm cursor-pointer"
-                  >
-                    <FileText className="h-5 w-5 shrink-0 text-green-600" />
-                    <div>
-                      <p className="text-sm font-bold">Imprimir Progreso</p>
-                      <p className="text-xs text-green-500 font-medium">Generar expediente físico</p>
-                    </div>
-                  </button>
                 </>
               ) : (
                 <>
@@ -1026,15 +1077,20 @@ export default function DashboardPage() {
             ))}
           </div>
           <form onSubmit={handleSendMessage} className="p-3 border-t bg-white flex gap-2 shrink-0">
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={chatInput}
               onChange={(e) => setChatInput(e.target.value)}
               placeholder="Escribe tu consulta..."
-              className="flex-1 border px-3 py-1.5 rounded-lg text-xs outline-none focus:ring-1 focus:ring-blue-500"
+              disabled={isChatLoading}
+              className="flex-1 border px-3 py-1.5 rounded-lg text-xs outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             />
-            <button type="submit" className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-700 transition-colors">
-              Enviar
+            <button
+              type="submit"
+              disabled={isChatLoading}
+              className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isChatLoading ? '...' : 'Enviar'}
             </button>
           </form>
         </div>

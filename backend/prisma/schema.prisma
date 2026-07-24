@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -123,4 +123,16 @@ model OrcidPublication {
   doi       String?
   journal   String? @db.Text
   embedding Json?
+}
+
+model ArticleTemplate {
+  id          String   @id @default(uuid())
+  name        String
+  description String?  @db.Text
+  fileUrl     String
+  structure   Json     // Extracted structure: sections, limits, etc.
+  journal     String?  // Journal name if applicable
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
