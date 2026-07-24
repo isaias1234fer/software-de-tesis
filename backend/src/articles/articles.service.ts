@@ -5,6 +5,7 @@ import { Document, Packer, Paragraph, HeadingLevel, AlignmentType, TextRun, Page
 import * as PDFDocument from 'pdfkit';
 import * as mammoth from 'mammoth';
 import * as pdfParse from 'pdf-parse';
+import { Multer } from 'multer';   // 👈 NUEVA IMPORTACIÓN
 import { EmailService } from '../email/email.service';
 
 @Injectable()
@@ -27,7 +28,7 @@ export class ArticlesService {
   // ═══════════════════════════════════════════════════════════════
   // EXTRAE CONTENIDO DE ARCHIVO (Word o PDF)
   // ═══════════════════════════════════════════════════════════════
-  private async extractFileContent(file: Express.Multer.File): Promise<string> {
+  private async extractFileContent(file: Multer.File): Promise<string> {   // 👈 CAMBIADO
     if (!file) return '';
 
     try {
@@ -152,7 +153,7 @@ export class ArticlesService {
   // ═══════════════════════════════════════════════════════════════
   // GENERA CONTENIDO DE ARTÍCULO ACADÉMICO
   // ═══════════════════════════════════════════════════════════════
-  async generateArticleContent(articleData: any, file?: Express.Multer.File) {
+  async generateArticleContent(articleData: any, file?: Multer.File) {   // 👈 CAMBIADO
     const {
       title,
       authorFirstName,
@@ -462,7 +463,7 @@ Estas conclusiones proporcionan bases sólidas para la toma de decisiones inform
   // ═══════════════════════════════════════════════════════════════
   // GENERA ARTÍCULO EN FORMATO WORD
   // ═══════════════════════════════════════════════════════════════
-  async generateArticleWord(articleData: any, userEmail?: string, file?: Express.Multer.File) {
+  async generateArticleWord(articleData: any, userEmail?: string, file?: Multer.File) {   // 👈 CAMBIADO
     const content = await this.generateArticleContent(articleData, file);
     const template = this.getUniversityTemplate(articleData.universityTemplate || 'UNT');
 
@@ -671,7 +672,7 @@ Estas conclusiones proporcionan bases sólidas para la toma de decisiones inform
   // ═══════════════════════════════════════════════════════════════
   // GENERA ARTÍCULO EN FORMATO PDF
   // ═══════════════════════════════════════════════════════════════
-  async generateArticlePdf(articleData: any, userEmail?: string, file?: Express.Multer.File): Promise<Buffer> {
+  async generateArticlePdf(articleData: any, userEmail?: string, file?: Multer.File): Promise<Buffer> {   // 👈 CAMBIADO
     const content = await this.generateArticleContent(articleData, file);
     const template = this.getUniversityTemplate(articleData.universityTemplate || 'UNT');
 
