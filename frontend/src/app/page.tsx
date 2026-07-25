@@ -2,7 +2,7 @@ import Link from "next/link";
 import { GraduationCap, FileText, CheckCircle, ShieldCheck, BookOpen } from "lucide-react";
 
 export default function Home() {
-  // 🔥 FUNCIÓN DE PRUEBA PARA DIAGNOSTICAR
+  // 🔥 FUNCIÓN DE PRUEBA CORREGIDA
   const testBackendConnection = async () => {
     try {
       console.log('🔍 Probando conexión con el backend...');
@@ -12,7 +12,12 @@ export default function Home() {
       alert('✅ Conexión exitosa con el backend: ' + JSON.stringify(data));
     } catch (error) {
       console.error('❌ Error de conexión:', error);
-      alert('❌ Error de conexión: ' + error.message);
+      // ✅ Manejo seguro de errores
+      if (error instanceof Error) {
+        alert('❌ Error de conexión: ' + error.message);
+      } else {
+        alert('❌ Error de conexión: Error desconocido');
+      }
     }
   };
 
