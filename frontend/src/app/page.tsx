@@ -2,6 +2,20 @@ import Link from "next/link";
 import { GraduationCap, FileText, CheckCircle, ShieldCheck, BookOpen } from "lucide-react";
 
 export default function Home() {
+  // 🔥 FUNCIÓN DE PRUEBA PARA DIAGNOSTICAR
+  const testBackendConnection = async () => {
+    try {
+      console.log('🔍 Probando conexión con el backend...');
+      const response = await fetch('https://software-de-tesis.onrender.com/');
+      const data = await response.json();
+      console.log('✅ Conexión exitosa:', data);
+      alert('✅ Conexión exitosa con el backend: ' + JSON.stringify(data));
+    } catch (error) {
+      console.error('❌ Error de conexión:', error);
+      alert('❌ Error de conexión: ' + error.message);
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-white">
       {/* Header/Navbar */}
@@ -46,6 +60,16 @@ export default function Home() {
                 >
                   Ver Demo
                 </Link>
+              </div>
+              {/* 🔥 BOTÓN DE PRUEBA */}
+              <div className="mt-6">
+                <button
+                  onClick={testBackendConnection}
+                  className="inline-flex h-11 items-center justify-center rounded-md bg-green-600 px-6 py-2 text-sm font-medium text-white shadow transition-colors hover:bg-green-700 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-green-700"
+                >
+                  🔍 Probar conexión con el servidor
+                </button>
+                <p className="text-xs text-gray-400 mt-2">Haz clic para diagnosticar el error de conexión</p>
               </div>
             </div>
           </div>
