@@ -1,6 +1,5 @@
 import { Controller, Post, Body, Res, HttpStatus, UseGuards, Req, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Multer } from 'multer'; 
 import { ArticlesService } from './articles.service';
 import { Response } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -23,7 +22,7 @@ export class ArticlesController {
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'Generate article in PDF format' })
   async generateArticlePdf(
-    @UploadedFile() file: Multer.File,                      // 👈 CAMBIADO
+    @UploadedFile() file: any,
     @Body('data') data: string,
     @Body('sendEmail') sendEmail: string,
     @Res() res: Response,
@@ -90,7 +89,7 @@ export class ArticlesController {
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'Generate article in Word format' })
   async generateArticleWord(
-    @UploadedFile() file: Multer.File,                      // 👈 CAMBIADO
+    @UploadedFile() file: any,
     @Body('data') data: string,
     @Body('sendEmail') sendEmail: string,
     @Res() res: Response,

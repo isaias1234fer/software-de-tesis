@@ -20,17 +20,17 @@ export declare class DashboardController {
             advisorId: string | null;
         };
     } & {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
         title: string;
+        score: number | null;
+        version: number;
+        id: string;
+        studentId: string;
         fileUrl: string;
         fileName: string;
-        version: number;
         fileType: string;
         status: string;
-        score: number | null;
         recipientEmail: string | null;
-        studentId: string;
+        createdAt: Date;
+        updatedAt: Date;
     })[]>;
 }

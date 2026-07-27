@@ -5,19 +5,19 @@ export declare class UsersController {
     private prisma;
     constructor(usersService: UsersService, prisma: PrismaService);
     getAdvisors(): Promise<{
+        name: string;
+        id: string;
+        email: string;
         advisorProfile: {
             id: string;
             orcidId: string;
         };
-        id: string;
-        email: string;
-        name: string;
     }[]>;
     getMyStudentProfile(req: any): Promise<{
         advisor: {
             user: {
-                email: string;
                 name: string;
+                email: string;
             };
         } & {
             id: string;

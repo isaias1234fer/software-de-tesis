@@ -13,24 +13,24 @@ export declare class DraftsController {
     constructor(draftsService: DraftsService, prisma: PrismaService, reportsService: ReportsService, aiService: AiService, emailService: EmailService);
     downloadReport(id: string, res: Response, req: any): Promise<void>;
     upload(file: any, title: string, req: any): Promise<{
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
         title: string;
+        score: number | null;
+        version: number;
+        id: string;
+        studentId: string;
         fileUrl: string;
         fileName: string;
-        version: number;
         fileType: string;
         status: string;
-        score: number | null;
         recipientEmail: string | null;
-        studentId: string;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     getAdvisorPendingDrafts(req: any): Promise<({
         student: {
             user: {
-                email: string;
                 name: string;
+                email: string;
             };
         } & {
             id: string;
@@ -38,49 +38,49 @@ export declare class DraftsController {
             advisorId: string | null;
         };
         aiReviews: {
+            summary: string;
+            score: number;
             id: string;
             createdAt: Date;
-            summary: string;
-            embedding: import("@prisma/client/runtime/library").JsonValue | null;
-            score: number;
-            findings: import("@prisma/client/runtime/library").JsonValue;
             draftId: string;
+            findings: import("@prisma/client/runtime/library").JsonValue;
+            embedding: import("@prisma/client/runtime/library").JsonValue | null;
         }[];
     } & {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
         title: string;
+        score: number | null;
+        version: number;
+        id: string;
+        studentId: string;
         fileUrl: string;
         fileName: string;
-        version: number;
         fileType: string;
         status: string;
-        score: number | null;
         recipientEmail: string | null;
-        studentId: string;
+        createdAt: Date;
+        updatedAt: Date;
     })[]>;
     findAll(req: any): Promise<{
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
         title: string;
+        score: number | null;
+        version: number;
+        id: string;
+        studentId: string;
         fileUrl: string;
         fileName: string;
-        version: number;
         fileType: string;
         status: string;
-        score: number | null;
         recipientEmail: string | null;
-        studentId: string;
+        createdAt: Date;
+        updatedAt: Date;
     }[]>;
     getOrcidMatch(id: string): Promise<any>;
     submitReview(id: string, comments: any, status: string, req: any): Promise<{
         id: string;
+        status: string;
         createdAt: Date;
         updatedAt: Date;
         advisorId: string;
-        status: string;
         draftId: string;
         comments: import("@prisma/client/runtime/library").JsonValue;
     }>;
@@ -88,49 +88,49 @@ export declare class DraftsController {
     downloadReportsZip(ids: string[], res: Response): Promise<void>;
     findOne(id: string): Promise<{
         aiReviews: {
+            summary: string;
+            score: number;
             id: string;
             createdAt: Date;
-            summary: string;
-            embedding: import("@prisma/client/runtime/library").JsonValue | null;
-            score: number;
-            findings: import("@prisma/client/runtime/library").JsonValue;
             draftId: string;
+            findings: import("@prisma/client/runtime/library").JsonValue;
+            embedding: import("@prisma/client/runtime/library").JsonValue | null;
         }[];
         humanReviews: {
             id: string;
+            status: string;
             createdAt: Date;
             updatedAt: Date;
             advisorId: string;
-            status: string;
             draftId: string;
             comments: import("@prisma/client/runtime/library").JsonValue;
         }[];
     } & {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
         title: string;
+        score: number | null;
+        version: number;
+        id: string;
+        studentId: string;
         fileUrl: string;
         fileName: string;
-        version: number;
         fileType: string;
         status: string;
-        score: number | null;
         recipientEmail: string | null;
-        studentId: string;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     remove(id: string): Promise<{
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
         title: string;
+        score: number | null;
+        version: number;
+        id: string;
+        studentId: string;
         fileUrl: string;
         fileName: string;
-        version: number;
         fileType: string;
         status: string;
-        score: number | null;
         recipientEmail: string | null;
-        studentId: string;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
 }
