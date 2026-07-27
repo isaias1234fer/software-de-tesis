@@ -54,9 +54,9 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       // Al primer login, user contiene los datos que devolvimos en authorize
       if (user) {
-        token.accessToken = user.accessToken;
-        token.role = user.role;
-        token.id = user.id;
+        token.accessToken = (user as any).accessToken;
+        token.role = (user as any).role;
+        token.id = (user as any).id;
         token.email = user.email;
         token.name = user.name;
       }
@@ -65,9 +65,9 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       // Transferimos los datos del token a la sesión
       if (token) {
-        session.accessToken = token.accessToken;
-        session.user.id = token.id;
-        session.user.role = token.role;
+        (session as any).accessToken = token.accessToken;
+        (session.user as any).id = token.id;
+        (session.user as any).role = token.role;
         session.user.email = token.email;
         session.user.name = token.name;
       }
