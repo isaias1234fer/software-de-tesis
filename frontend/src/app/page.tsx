@@ -1,3 +1,4 @@
+"use client";
 import Link from "next/link";
 import { GraduationCap, FileText, CheckCircle, ShieldCheck, BookOpen } from "lucide-react";
 
